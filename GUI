@@ -1,0 +1,656 @@
+
+
+import java.awt.Frame;
+import java.awt.event.WindowEvent;
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+//import java.time.LocalDate;
+import java.sql.Types;
+
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
+
+import javafx.application.Application;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.stage.Stage;
+import javafx.util.Callback;
+import javafx.scene.Scene;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableColumn.CellDataFeatures;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
+import java.sql.ResultSet;
+
+
+
+
+public class store extends Application {
+
+    
+    
+    Statement st;
+    //TABLE VIEW AND DATA
+    private ObservableList<ObservableList> data;
+    private TableView tableview;
+    public TextField usernameField, cutomeridField,passwordField,productField,productQtyField;
+    public TextField cartIDField,shipaddressSameF,shipaddressF,shipcityF,shipprovinceF,shipPostalCodeF;
+    public Button login, addToCart,deleteFromCart, displayCartItem,placeOrder, displayShoppingCartTotal, displayorderdetail;
+@Override
+public void start(Stage primaryStage) {
+
+	try {
+		Connection con= Data.getDBConnection();
+		//Create Border Pane Layout
+		BorderPane border = new BorderPane();
+		//TableView
+        tableview = new TableView();
+        buildData();
+        
+		border.setTop(tableview);
+		border.setLeft(addGridPaneLeft());
+		border.setRight(addGridPaneRight());
+		//border.setBottom(addGridPanebottomRight());
+	    Scene scene = new Scene(border, 900, 500);
+	    // Place the scene in the stage
+	    primaryStage.setScene(scene); 
+	    primaryStage.setTitle("ELECTRONIC STORE");
+	    //Display the stage
+	    primaryStage.show();
+
+		st=con.createStatement();	
+		
+
+		addToCart.setOnAction(new EventHandler<ActionEvent>()
+		{
+			@Override
+			public void handle(ActionEvent e)
+			{
+				
+				int customerID= Integer.parseInt(cutomeridField.getText());
+				//String username= usernameField.getText();
+                String password= passwordField.getText();
+                int productid = Integer.parseInt(productField.getText());
+                int productQty=  Integer.parseInt(productQtyField.getText());
+                
+                int cartid = Integer.parseInt(cartIDField.getText());
+                int shipaddressSame= Integer.parseInt(shipaddressSameF.getText());
+                String ship_address=shipaddressF.getText();
+                String ship_city=shipcityF.getText();    
+                String ship_province= shipprovinceF.getText();
+                String ship_postalCode = shipPostalCodeF.getText();
+                
+              
+				try
+				{
+					Connection connection = Data.getDBConnection();
+					ResultSet rs = null;
+                    int basketId = 0;
+                    
+					//try {
+                    
+					//String query ="MERGE INTO SHOPPINGBASKET USING dual ON ( ShoppingBasketID=?) "
+					//		+ "WHEN MATCHED THEN UPDATE SET QUANTITY=?,OrderPaid=?, IsShipAddressSame=?,ShipAddress=?,ShipCity=?,ShipProvince=?,ShipPostalCode=? "
+					//		+ "WHEN NOT MATCHED THEN INSERT (ShoppingBasketID,CustomerID,QUANTITY, OrderPaid, IsShipAddressSame,ShipAddress,ShipCity,ShipProvince,ShipPostalCode) values (?,(select customerid from customer where username=?), ?,?, ?,?, ?, ?, ?)";
+                    //String query = "UPDATE SHOPPINGBASKET SET CustomerID=(select customerid from customer where username=?),QUANTITY=?,OrderPaid=?, IsShipAddressSame=?,ShipAddress=?,ShipCity=?,ShipProvince=?,ShipPostalCode=? WHERE ShoppingBasketID=?";
+					
+                    String query = "UPDATE SHOPPINGBASKET SET CustomerID=?,QUANTITY=?,OrderPaid=?, IsShipAddressSame=?,ShipAddress=?,ShipCity=?,ShipProvince=?,ShipPostalCode=? WHERE ShoppingBasketID=?";
+					
+                    PreparedStatement statement = connection.prepareStatement(query);
+					
+                     statement.setInt(1, customerID);
+					 //statement.setString(1, username);
+					 statement.setInt(2, 1);
+	                 statement.setInt(3, 0);
+	                 statement.setInt(4, shipaddressSame);
+	                 statement.setString(5, ship_address);
+	                 statement.setString(6, ship_city);
+	                 statement.setString(7, ship_province);
+	                 statement.setString(8, ship_postalCode);
+	                 statement.setInt(9, cartid);
+	                 
+	                 
+	                 /*
+                    statement.setInt(9, cartid);
+                    //statement.setInt(2, customerID);
+                    statement.setString(10, username);
+                    statement.setInt(11, 1);
+                    statement.setInt(12, 0);
+                    statement.setInt(13, shipaddressSame);
+                    statement.setString(14, ship_address);
+                    statement.setString(15, ship_city);
+                    statement.setString(16, ship_province);
+                    statement.setString(17, ship_postalCode);
+                 
+                    */
+	                 
+	                 
+                    
+                    int rowAffected = statement.executeUpdate();
+                    /*
+                    if(rowAffected == 1)
+                    {
+                        // get shopping basket id
+                        rs = statement.getGeneratedKeys();
+                        if(rs.next())
+                            basketId = rs.getInt(1);
+                            //System.out.println(basketId);
+                        
+                    }
+                   /*} catch (SQLException ex) {
+                    System.out.println(ex.getMessage());
+                   } finally {
+                    try {
+                        if(rs != null)  rs.close();
+                    } catch (SQLException e1) {
+                        System.out.println(e1.getMessage());
+                    }
+                    
+                */
+                    //statement.close();
+                    
+				    String query2 ="INSERT INTO SHOPPINGBASKETPRODUCT(ProductID, ShoppingBasketID, Quantity) VALUES (?, ?, ?)";
+				    PreparedStatement statement2 = connection.prepareStatement(query2);
+				    statement2.setInt(1, productid);
+                    statement2.setInt(2, cartid);
+                    statement2.setInt(3, productQty);
+					
+					int rowAffected2 = statement2.executeUpdate();
+					System.out.print(rowAffected2);
+					statement2.close();
+					
+				}
+				catch (SQLException e1) {
+				e1.printStackTrace();
+				}
+			}
+
+			private void alert(String string, String string2, AlertType information) {
+				// TODO Auto-generated method stub
+				
+			}
+		} 
+		
+		);
+		
+
+
+		displayCartItem.setOnAction(new EventHandler<ActionEvent>()
+		{
+			@Override
+			public void handle(ActionEvent e)
+			{
+				try
+				{   Connection connection = Data.getDBConnection();
+					st=connection.createStatement();
+					
+					DefaultTableModel model = new DefaultTableModel(new String[]{ "customerID" ,"productID" ,"qty_ordered" ,"unit_price","item_discount_rate "}, 0);
+					String selectPlayer = "SELECT b.customerid, bi.productid ,bi.quantity,p.price,d.DiscountPrecent FROM shoppingbasket b JOIN shoppingbasketproduct bi on b.shoppingbasketid = bi.shoppingbasketid JOIN product p on bi.productid = p.productid JOIN discount d on p.discountid=d.discountid WHERE b.shoppingbasketid="+Integer.parseInt(cartIDField.getText());
+					
+					
+					ResultSet rs=st.executeQuery(selectPlayer);
+					while(rs.next())
+					{
+						String customerID = rs.getString("customerid");
+						String productID = rs.getString("productid");
+						String qty_ordered = rs.getString("quantity");
+						String unit_price = rs.getString("price");
+						String item_discount_rate = rs.getString("DiscountPrecent");
+
+						model.addRow(new Object[]{customerID, productID,qty_ordered,unit_price,item_discount_rate});
+						
+						
+						
+					}
+					Frame f=new Frame();
+					JTable jt=new JTable(); 
+					jt.setModel(model);
+					jt.setBounds(30,40,200,300);          
+					JScrollPane sp=new JScrollPane(jt);    
+					f.add(sp);          
+					f.setSize(300,400);    
+					f.setVisible(true);  
+			
+					f.dispatchEvent(new WindowEvent(f, WindowEvent.WINDOW_CLOSING));
+				}
+				catch (Exception e1) {
+					e1.printStackTrace();
+					}			
+			}	
+		}
+		
+				);  
+		
+		 displayShoppingCartTotal.setOnAction(new EventHandler<ActionEvent>()
+			{
+				@Override
+				public void handle(ActionEvent e)
+				{
+					int cartid = Integer.parseInt(cartIDField.getText());
+					
+					try
+					{   Connection conn = Data.getDBConnection();
+                   
+				    // Create a statement
+				    Statement stmt = conn.createStatement();
+                         
+				    /*
+				    // Prepare to call the stored functions and procedures.
+				    // This sample uses the SQL92 syntax
+				    CallableStatement cstmt = conn.prepareCall ("{? = call RAISESAL (?, ?)}");
+
+				    // Declare that the first ? is a return value of type Int
+				    cstmt.registerOutParameter (1, Types.INTEGER);
+
+				    // We want to raise LESLIE's salary by 20,000
+				    cstmt.setString (2, "LESLIE");  // The name argument is the second ?
+				    cstmt.setInt (3, 20000);        // The raise argument is the third ?
+				  
+				    // Do the raise
+				    cstmt.execute ();
+
+				    // Get the new salary back
+				    int new_salary = cstmt.getInt (1);
+
+				    System.out.println ("The new salary is: " + new_salary);
+
+				    // Close the statement
+				    cstmt.close();
+
+				    // Close the connection
+				    conn.close();
+				    */
+				    
+                /*
+				    // Call a function with an IN parameter
+				    {
+				      CallableStatement funcin = conn.prepareCall 
+				                                 ("begin ? := purchase_package.subtotal_claculation(?); end;");
+				      funcin.registerOutParameter (1, Types.NUMERIC);
+				      funcin.setInt(2, cartid);
+				      funcin.execute ();
+				      subtotal=funcin.getDouble(1);
+				      System.out.println ("Cart Subtotal: " + subtotal);
+				      funcin.close();
+				    }
+				    
+				    // Call a function with an IN parameter
+				    {
+				      CallableStatement ship_function = conn.prepareCall 
+				                                 ("begin ? := purchase_package.shipping_fee_claculation(?); end;");
+				      ship_function.registerOutParameter (1, Types.NUMERIC);
+				      ship_function.setDouble(2, subtotal);
+				      ship_function.execute ();
+				      System.out.println ("Cart Subtotal: " + ship_function.getDouble(1));
+				      ship_function.close();
+				    }
+				    
+				    // Call a function with an IN parameter
+				    {
+				      CallableStatement discount_function = conn.prepareCall 
+				                                 ("begin ? := purchase_package.total_discount_claculation(?); end;");
+				      discount_function.registerOutParameter (1, Types.NUMERIC);
+				      discount_function.setInt(2, cartid);
+				      discount_function.execute ();
+				      System.out.println ("Cart Subtotal: " + discount_function.getDouble(1));
+				      discount_function.close();
+				    }
+			*/
+				    //Call basket_total procedure 
+				    {
+				    CallableStatement statement1= conn.prepareCall("{call  purchase_package.basket_total(?, ?, ?, ?,?,?,?,?)}");
+				    statement1.registerOutParameter(2, Types.INTEGER);
+				    statement1.registerOutParameter(3, Types.DOUBLE);
+				    statement1.registerOutParameter(4, Types.DOUBLE);
+				    statement1.registerOutParameter(5, Types.DOUBLE);
+				    statement1.registerOutParameter(6, Types.DOUBLE);
+				    statement1.registerOutParameter(7, Types.DOUBLE);
+				    statement1.registerOutParameter(8, Types.DOUBLE);
+				    
+				    statement1.setInt(1, cartid);
+				    
+				    statement1.execute();
+				    
+				    int totalQty = statement1.getInt(2);
+				    Double subtotal=statement1.getDouble(3);
+				    Double TotalDiscount=statement1.getDouble(4);
+				    Double shipping=statement1.getDouble(5);
+				    Double TotalBeforeTax=statement1.getDouble(6);
+				    Double tax=statement1.getDouble(7);
+				    Double Total=statement1.getDouble(8);
+				    
+				    System.out.println(" " );
+				    System.out.println("Total quantity in cart: " + totalQty);
+				    System.out.println("Subtotal: " + subtotal);
+				    System.out.println("Total Discount: " + TotalDiscount);
+				    System.out.println("Shipping Fee: " + shipping);
+				    System.out.println("Total Before Tax: " + TotalBeforeTax);
+				    System.out.println("Tax: " + tax);
+				    System.out.println("Total: " + Total);
+				
+				    statement1.close();
+				    }
+				    
+											}
+					catch (Exception e1) {
+						e1.printStackTrace();
+						}			
+				}	
+			}
+			
+					);  
+
+		 
+		 login.setOnAction(new EventHandler<ActionEvent>(){   
+				
+				@Override
+				public void handle(ActionEvent e)
+				{
+					int customerID= Integer.parseInt(cutomeridField.getText());
+					String password= passwordField.getText();
+					
+					try
+					{   Connection conn = Data.getDBConnection();
+                
+				    // Create a statement
+				    Statement stmt = conn.createStatement();
+				    
+				    
+				    // Call login procedure
+	
+				      CallableStatement proc = conn.prepareCall("{call  purchase_package.Login_CK_SP(?, ?, ?, ?)}");
+				      proc.registerOutParameter(3, Types.VARCHAR);
+				      proc.registerOutParameter (4, Types.VARCHAR);
+				      
+				      proc.setInt(1, customerID);
+				      proc.setString(2, password);
+				      proc.execute();
+				      String name=proc.getString(3);
+				      String validity=proc.getString(4);
+				      
+				      System.out.println(" ");
+				      
+				      if (validity!= null) {
+				    	  System.out.println(validity+ " please try again: ");
+				    	} else {
+				    	  System.out.println("Login sucessful! Welcome "+ name); 
+				    	}
+				      proc.close();
+				
+				    
+					}
+					catch (Exception e1) {
+						e1.printStackTrace();
+						}		
+					}	
+				});  
+		 
+		 
+		 placeOrder.setOnAction(new EventHandler<ActionEvent>(){   
+				
+				@Override
+				public void handle(ActionEvent e)
+				{
+					
+	                int cartid = Integer.parseInt(cartIDField.getText());
+					
+					try
+					{   // Create a statement
+				        Connection connection = Data.getDBConnection();
+				        
+				        String query = "UPDATE shoppingbasket SET OrderPaid=1 WHERE ShoppingBasketID=?";
+					
+                        PreparedStatement statement = connection.prepareStatement(query);
+					
+                        statement.setInt(1, cartid);
+	                    
+	                    int rowAffected = statement.executeUpdate();
+	                    statement.close();
+
+					}
+					catch (Exception e1) {
+						e1.printStackTrace();
+						}		
+					}	
+				});  
+		 
+
+
+		    displayorderdetail.setOnAction(new EventHandler<ActionEvent>()
+			{
+				@Override
+				public void handle(ActionEvent e)
+				{
+					try
+					{   Connection connection = Data.getDBConnection();
+						st=connection.createStatement();
+						
+						DefaultTableModel model = new DefaultTableModel(new String[]{ "BasketID","customerID" ,"subtotal","order_paid","Is_ShipAddress_Same" ,"Ship_Address","Ship_City","Ship_Province","Ship_Postal_Code"}, 0);
+						String selectPlayer = "SELECT ShoppingBasketID, CustomerID,  purchase_package.subtotal_claculation(ShoppingBasketID) subtotal, OrderPaid, IsShipAddressSame,ShipAddress,ShipCity,ShipProvince,ShipPostalCode FROM shoppingbasket WHERE shoppingbasketid="+Integer.parseInt(cartIDField.getText());
+						
+						
+						ResultSet rs=st.executeQuery(selectPlayer);
+						while(rs.next())
+						{    
+							String BasketID = rs.getString("ShoppingBasketID");
+							String customerID = rs.getString("CustomerID");
+							String subtotal= rs.getString("subtotal");
+							String order_paid= rs.getString("OrderPaid");
+							String Is_ShipAddress_Same = rs.getString("IsShipAddressSame");
+							String Ship_Address= rs.getString("ShipAddress");
+							String Ship_City= rs.getString("ShipCity");
+							String Ship_Province= rs.getString("ShipProvince");
+							String Ship_Postal_Code= rs.getString("ShipPostalCode");
+
+							model.addRow(new Object[]{BasketID,customerID,subtotal,order_paid,Is_ShipAddress_Same,Ship_Address,Ship_City,Ship_Province,Ship_Postal_Code});
+							
+							
+							
+						}
+						Frame f=new Frame();
+						JTable jt=new JTable(); 
+						jt.setModel(model);
+						jt.setBounds(30,40,200,300);          
+						JScrollPane sp=new JScrollPane(jt);    
+						f.add(sp);          
+						f.setSize(300,400);    
+						f.setVisible(true);  
+				
+						f.dispatchEvent(new WindowEvent(f, WindowEvent.WINDOW_CLOSING));
+					}
+					catch (Exception e1) {
+						e1.printStackTrace();
+						}			
+				}	
+			}
+			
+					);  
+
+
+	}
+	catch(Exception e)
+	{
+		e.printStackTrace();
+	}
+	
+
+}
+
+//CONNECTION DATABASE
+public void buildData(){
+      Connection c ;
+      data = FXCollections.observableArrayList();
+      try{
+        c = Data.getDBConnection();
+        //SQL FOR SELECTING ALL OF CUSTOMER
+        String SQL = "SELECT p.*,pw.count from product p join productwarehouse pw on p.productid=pw.productid";
+
+        //ResultSet
+        ResultSet rs = c.createStatement().executeQuery(SQL);
+
+        /**********************************
+         * TABLE COLUMN ADDED DYNAMICALLY *
+         **********************************/
+        for(int i=0 ; i<rs.getMetaData().getColumnCount(); i++){
+            //We are using non property style for making dynamic table
+            final int j = i;                
+            TableColumn col = new TableColumn(rs.getMetaData().getColumnName(i+1));
+            col.setCellValueFactory(new Callback<CellDataFeatures<ObservableList,String>,ObservableValue<String>>(){                    
+                public ObservableValue<String> call(CellDataFeatures<ObservableList, String> param) {                                                                                              
+                    return new SimpleStringProperty(param.getValue().get(j).toString());                        
+                }                    
+            });
+
+            tableview.getColumns().addAll(col); 
+            System.out.println("Column ["+i+"] ");
+        }
+        /********************************
+         * Data added to ObservableList *
+         ********************************/
+        while(rs.next()){
+            //Iterate Row
+            ObservableList<String> row = FXCollections.observableArrayList();
+            for(int i=1 ; i<=rs.getMetaData().getColumnCount(); i++){
+                //Iterate Column
+                row.add(rs.getString(i));
+            }
+            System.out.println("Row [1] added "+row );
+            data.add(row);
+
+        }
+
+        //FINALLY ADDED TO TableView
+        tableview.setItems(data);
+      }catch(Exception e){
+          e.printStackTrace();
+          System.out.println("Error on Building Data");             
+      }
+  }
+
+
+
+public GridPane addGridPaneLeft()
+{
+	GridPane pane = new GridPane();
+    pane.setAlignment(Pos.TOP_LEFT);
+    pane.setPadding(new Insets(10, 10, 10, 10));
+    pane.setHgap(10);
+    pane.setVgap(5);
+	//Adding Text fields
+    //cutomeridField = new TextField();
+    //usernameField=new TextField();
+    cutomeridField=new TextField();
+    passwordField = new TextField();
+    cartIDField=new TextField();
+    productField = new TextField();
+    productQtyField = new TextField();
+   
+	
+	 //Adding fields into border Pane
+    pane.add(new Label("User Information"), 0, 0);
+    pane.add(new Label("cutomoer ID:"), 0, 2);
+    pane.add(cutomeridField, 10, 2);
+    //pane.add(new Label("username:"), 0, 2);
+    //pane.add(usernameField, 10, 2);
+    pane.add(new Label("Password:"), 0, 3);
+    pane.add(passwordField, 10, 3);
+    login = new Button("Login");
+    pane.add(login, 0, 4);
+    
+    
+    pane.add(new Label("Add item into cart"), 0, 5);
+    pane.add(new Label("cart ID:"), 0, 6);
+    pane.add(cartIDField, 10, 6);
+    pane.add(new Label("Please enter productID of the product you wish to purchase:"), 0, 7);
+    pane.add(productField, 10, 7);
+    pane.add(new Label("Please enter quantity of this product you wish to purchase:"), 0, 8);
+    pane.add(productQtyField, 10, 8);
+    
+    //Create buttons
+    addToCart = new Button("Add item to cart");
+  	displayCartItem=new Button("Display Items in cart");
+  	pane.add(addToCart, 0, 10);
+  	pane.add(displayCartItem, 0, 11);
+  	displayShoppingCartTotal=new Button("Calculate shopping cart total");
+  	pane.add(displayShoppingCartTotal, 0, 12);
+    
+    return pane;
+}
+
+public GridPane addGridPaneRight()
+{
+	GridPane pane = new GridPane();
+	pane.setAlignment(Pos.TOP_RIGHT);
+	pane.setPadding(new Insets(15, 15, 15, 15));
+	pane.setHgap(10);
+    pane.setVgap(10);
+    
+   
+
+    shipaddressSameF = new TextField();
+    shipaddressF= new TextField();
+    shipcityF = new TextField();
+    shipprovinceF= new TextField();
+    shipPostalCodeF= new TextField();
+	
+	//pane.add(new Label("Update Player by ID"), 0, 1);
+	//pane.add(updateplayerid, 5, 1);
+	//updatePlayer=new Button("Update");
+	//pane.add(updatePlayer, 7, 1);
+	pane.add(new Label("Order Information"),0, 10);
+	pane.add(new Label("Is shipping address same as adress on profile?"), 0, 11);
+	pane.add(shipaddressSameF, 5, 11);
+	pane.add(new Label("shipping address"), 0, 12);
+	pane.add(shipaddressF, 5, 12);
+	pane.add(new Label("shipping city"), 0, 13);
+	pane.add(shipcityF,5, 13);
+	pane.add(new Label("shippping province"), 0, 14);
+	pane.add(shipprovinceF, 5, 14);
+	pane.add(new Label("shippping postal code"), 0, 15);
+	pane.add(shipPostalCodeF, 5, 15);
+	placeOrder= new Button("Place Order");
+	pane.add(placeOrder, 0, 16);
+	displayorderdetail= new Button("display order detail");
+	pane.add(displayorderdetail, 0, 17);
+	return pane;	
+}
+
+
+
+
+public static void main(String[] args) {
+	launch(args);
+}
+
+public boolean isDbConnected(Connection con) {
+    try {
+        return con != null && !con.isClosed();
+    } catch (SQLException ignored) {}
+
+    return false;
+}
+
+
+
+
+
+
+
+}
