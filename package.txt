@@ -1,0 +1,185 @@
+
+--Package
+
+-- Package Specification
+CREATE OR REPLACE PACKAGE purchase_package AS
+FUNCTION shipping_fee_claculation(sub_total IN shoppingbasket.subtotal%TYPE)RETURN shoppingbasket.shippingfee%TYPE;
+FUNCTION subtotal_claculation(basketid IN NUMBER)RETURN shoppingbasket.subtotal%TYPE;
+FUNCTION total_discount_claculation(basketid IN NUMBER) RETURN shoppingbasket.totaldiscount%TYPE;
+FUNCTION basket_tax_rate(basketid IN NUMBER)RETURN NUMBER;
+
+PROCEDURE basket_total(p_idbasket IN shoppingbasket.shoppingbasketid%Type, 
+p_qty OUT shoppingbasket.quantity%Type,
+p_subtotal OUT shoppingbasket.total%Type,
+p_totaldiscount OUT shoppingbasket.totaldiscount%Type,
+p_shipfee OUT shoppingbasket.shippingfee%TYPE,
+p_totalbeforetax OUT shoppingbasket.totalbeforetax%TYPE,
+p_tax OUT shoppingbasket.tax%TYPE,
+p_total OUT shoppingbasket.total%TYPE);
+
+PROCEDURE Login_CK_SP(a_userid IN customer.customerid%TYPE,
+a_password IN customer.password%TYPE,
+a_name OUT customer.name%TYPE,
+a_check OUT VARCHAR2);
+
+END purchase_package;
+
+
+
+
+
+/
+CREATE OR REPLACE PACKAGE BODY purchase_package
+IS
+FUNCTION shipping_fee_claculation(sub_total IN shoppingbasket.subtotal%TYPE)
+RETURN shoppingbasket.shippingfee%TYPE
+IS 
+lv_shipping_fee NUMBER(4,2);
+BEGIN
+ if sub_total > 300 then
+ lv_shipping_fee := 0;
+ else lv_shipping_fee := 10;
+ end if;
+ RETURN lv_shipping_fee;
+END shipping_fee_claculation;
+
+
+FUNCTION subtotal_claculation(basketid IN NUMBER)
+ RETURN shoppingbasket.subtotal%TYPE
+ IS 
+ CURSOR cur IS
+    SELECT b.customerid customerid ,bi.productid productid ,bi.quantity qty_ordered,p.price price
+    FROM shoppingbasket b JOIN shoppingbasketproduct bi on b.shoppingbasketid = bi.shoppingbasketid JOIN product p on bi.productid = p.productid
+    WHERE b.shoppingbasketid=basketid;
+
+ lv_sub_total NUMERIC (10, 2):=0;
+ BEGIN
+   FOR rec_itemorder in cur LOOP
+    lv_sub_total:=lv_sub_total+(rec_itemorder.price*rec_itemorder.qty_ordered);
+   END LOOP;
+   RETURN lv_sub_total;
+ END subtotal_claculation;
+
+FUNCTION total_discount_claculation(basketid IN NUMBER)
+RETURN shoppingbasket.totaldiscount%TYPE
+IS 
+CURSOR cur IS
+    SELECT b.customerid customerid ,bi.productid productid ,bi.quantity qty_ordered,p.price price,d.DiscountPrecent item_discount_rate
+    FROM shoppingbasket b JOIN shoppingbasketproduct bi on b.shoppingbasketid = bi.shoppingbasketid JOIN product p on bi.productid = p.productid JOIN discount d on p.discountid=d.discountid
+    WHERE b.shoppingbasketid=basketid;
+
+lv_total_discount NUMERIC (10, 2):=0;
+
+BEGIN
+   FOR rec in cur LOOP
+    lv_total_discount:=lv_total_discount+(rec.price*rec.qty_ordered)*rec.item_discount_rate;
+   END LOOP;
+   RETURN lv_total_discount;
+END total_discount_claculation;
+
+
+function basket_tax_rate(basketid IN NUMBER)
+ return number 
+ IS
+ pr_province VARCHAR2(2);
+ tax_rate number;
+ begin
+ SELECT shipprovince INTO pr_province FROM shoppingbasket WHERE shoppingbasket.shoppingbasketid = basketid;
+ if pr_province = 'ON'
+ then tax_rate := 0.13;
+ return tax_rate;
+ elsif pr_province = 'BC'
+ then tax_rate := 0.12;
+ elsif pr_province = 'QC'
+ then tax_rate := 0.15;
+ elsif pr_province = 'AB'
+ then tax_rate := 0.05;
+ end if;
+ return tax_rate;
+ end basket_tax_rate;
+ 
+ 
+
+PROCEDURE basket_total(p_idbasket IN shoppingbasket.shoppingbasketid%Type, 
+p_qty OUT shoppingbasket.quantity%Type,
+p_subtotal OUT shoppingbasket.total%Type,
+p_totaldiscount OUT shoppingbasket.totaldiscount%Type,
+p_shipfee OUT shoppingbasket.shippingfee%TYPE,
+p_totalbeforetax OUT shoppingbasket.totalbeforetax%TYPE,
+p_tax OUT shoppingbasket.tax%TYPE,
+p_total OUT shoppingbasket.total%TYPE)
+IS
+BEGIN
+ select sum(quantity)
+ INTO p_qty
+ FROM shoppingbasketproduct
+ WHERE shoppingbasketid=p_idbasket;
+ p_subtotal:= subtotal_claculation(p_idbasket);
+ p_totaldiscount:=total_discount_claculation(p_idbasket);
+ p_shipfee:=shipping_fee_claculation(p_subtotal);
+ p_totalbeforetax:= p_subtotal-p_totaldiscount+p_shipfee;
+ p_tax:=p_totalbeforetax*basket_tax_rate(p_idbasket);
+ p_total:=p_totalbeforetax+ p_tax;
+
+END basket_total;
+
+
+PROCEDURE Login_CK_SP(a_userid IN customer.customerid%TYPE,
+    a_password IN customer.password%TYPE,
+    a_name OUT customer.name%TYPE,
+    a_check OUT VARCHAR2)
+IS
+BEGIN
+    SELECT name
+    INTO a_name
+    FROM customer
+    WHERE customerid= a_userid AND password = a_password;
+    DBMS_OUTPUT.PUT_LINE('Welcome: '||a_name);
+    
+    EXCEPTION
+    WHEN NO_DATA_FOUND THEN   
+    a_check := 'INVALID Login';
+    DBMS_OUTPUT.PUT_LINE(a_check);
+END Login_CK_SP;
+
+
+END purchase_package;
+/
+
+commit;
+
+
+ 
+ 
+ 
+
+
+--Test Package
+
+declare
+ lv_qty shoppingbasket.quantity%Type;
+ lv_subtotal shoppingbasket.total%Type;
+ lv_totaldiscount shoppingbasket.totaldiscount%Type;
+ lv_shipfee shoppingbasket.shippingfee%TYPE;
+ lv_totalbeforetax shoppingbasket.totalbeforetax%TYPE;
+ lv_tax shoppingbasket.tax%TYPE;
+ lv_total shoppingbasket.total%TYPE;
+begin
+ purchase_package.basket_total(101,lv_qty,lv_subtotal,lv_totaldiscount,lv_shipfee,lv_totalbeforetax,lv_tax,lv_total);
+ 
+ 
+ DBMS_OUTPUT.PUT_LINE (lv_qty);
+ 
+ DBMS_OUTPUT.PUT_LINE (lv_subtotal);
+    
+ DBMS_OUTPUT.PUT_LINE (lv_totaldiscount);
+    
+ DBMS_OUTPUT.PUT_LINE (lv_shipfee);
+    
+ DBMS_OUTPUT.PUT_LINE (lv_totalbeforetax);
+ DBMS_OUTPUT.PUT_LINE (lv_tax);
+  DBMS_OUTPUT.PUT_LINE (lv_total);
+
+    
+end;
+

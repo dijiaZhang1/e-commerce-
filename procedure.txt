@@ -1,0 +1,55 @@
+CREATE OR REPLACE PROCEDURE PLACE_ORDER(c_id IN OUT INTEGER, p_id IN OUT INTEGER, qty IN OUT INTEGER)
+AS
+ship_address Customer.Address%type;
+ship_city Customer.City%type;
+ship_province Customer.Province%type;
+ship_code Customer.PostalCode%type;
+ship_phone Customer.Phone%type;
+ship_email Customer.Email%type;
+total_price ShoppingBasket.Total%type;
+
+function calculate_total
+return number
+is
+pr_price NUMERIC (10, 2);
+sub_total number(9,2);
+total_discount number(9,2);
+shipping_fee number(4,2);
+bef_tax number(9,2);
+total number(9,2);
+dis_id integer;
+begin
+select Price into pr_price from Product where Product.ProductID = p_id;
+sub_total := price * qty;
+select DiscountID into dis_id from Product where Product.ProductID = p_id;
+if dis_id = 0 then 
+total_discount := 0;
+elsif dis_id = 1 then 
+total_discount := sub_total * 0.4;
+elsif dis_id = 2 then
+total_discount := sub_total * 0.2;
+elsif dis_id = 3 then
+total_discount := sub_total * 0.1;
+end if;
+
+if sub_total > 300 then
+shipping_fee := 0;
+else shipping_fee := 15;
+end if;
+
+bef_tax := sub_total - total_discount + shipping_fee;
+total := bef_tax + (bef_tax*0.13);
+return total;
+end;
+BEGIN
+total_price := calculate_total;
+SELECT Address INTO ship_address FROM Customer WHERE Customer.CustomerID = c_id;
+SELECT City INTO ship_city FROM Customer WHERE Customer.CustomerID = c_id;
+SELECT Province INTO ship_province FROM Customer WHERE Customer.CustomerID = c_id;
+SELECT PostalCode INTO ship_code FROM Customer WHERE Customer.CustomerID = c_id;
+SELECT Phone INTO ship_phone FROM Customer WHERE Customer.CustomerID = c_id;
+SELECT Email INTO ship_email FROM Customer WHERE Customer.CustomerID = c_id;
+
+insert into ShoppingBasket(ShoppingBasketID, CustomerID, Total, Quantity, Address, City, Province, PostalCode, Phone, Email) values(ShoppingBasketID_seq.nextval, c_id, total_price, qty, ship_address, ship_city, ship_province, ship_code, ship_phone, ship_email);
+
+END PLACE_ORDER;

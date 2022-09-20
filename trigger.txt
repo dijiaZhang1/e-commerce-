@@ -1,0 +1,56 @@
+
+--TRIGGER
+CREATE OR REPLACE TRIGGER stock_update_trg
+  AFTER UPDATE OF OrderPaid ON shoppingbasket
+  FOR EACH ROW 
+  WHEN(OLD.orderpaid!=1 and NEW.orderpaid=1)
+ DECLARE
+  CURSOR item_incart_cur IS
+  SELECT productid,quantity
+  FROM shoppingbasketproduct 
+  WHERE shoppingbasketid=:NEW.shoppingbasketid;
+  lv_qty_ordered NUMBER(5,0);
+ BEGIN
+  FOR rec_item in item_incart_cur LOOP
+   lv_qty_ordered:=rec_item.quantity;
+   UPDATE productwarehouse
+   SET count=count-lv_qty_ordered;
+  END LOOP;
+END;
+
+
+/
+
+--TRIGGER (automically fill shipping adress with the user's adress on profile
+CREATE OR REPLACE TRIGGER shipping_address_same_trg 
+BEFORE UPDATE ON shoppingbasket
+    FOR EACH ROW
+DECLARE 
+user_address VARCHAR2(50);
+user_city VARCHAR2(20);
+user_province VARCHAR2(2);
+user_postal_code VARCHAR2(7);
+BEGIN
+ SELECT address,city,province,postalcode
+ INTO user_address,user_city,user_province,user_postal_code
+ FROM customer
+ WHERE customerid=:NEW.CUSTOMERID;
+
+  IF :NEW.ISSHIPADDRESSSAME=1 THEN
+        :NEW.shipaddress := user_address;
+        :NEW.shipprovince := user_province;
+        :NEW.shipcity := user_city;
+        :NEW.shippostalcode := user_postal_code;
+  END IF;
+ 
+END;
+
+/--TEST shipping_address_same_trg 
+INSERT INTO ShoppingBasket (SHOPPINGBASKETID,customerid,quantity,orderpaid,subtotal,shippingfee,tax,total,ISSHIPADDRESSSAME)
+VALUES (SHOPPINGBASKETID_SEQ.nextval,103,1,0,0,0,0,0,1);
+
+select * from ShoppingBasket;
+
+
+
+

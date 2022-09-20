@@ -1,0 +1,379 @@
+DROP SEQUENCE CustomerID_seq;
+DROP SEQUENCE ShoppingBasketID_seq;
+DROP SEQUENCE CategoryID_seq;
+DROP SEQUENCE ProductID_seq;
+DROP SEQUENCE WarehouseID_seq ;
+DROP SEQUENCE ShoppingBasketProductID_seq;
+DROP SEQUENCE BrandID_seq;
+
+
+DROP TABLE ShoppingBasketProduct;
+DROP TABLE PRODUCTCATEGORY;
+DROP TABLE PRODUCTWAREHOUSE;
+DROP TABLE Warehouse;
+DROP TABLE SHOPPINGBASKET;
+DROP TABLE PRODUCT;
+DROP TABLE DISCOUNT;
+DROP TABLE BRAND;
+DROP TABLE CATEGORY;
+DROP TABLE CUSTOMER;
+
+
+
+--Create sequences
+CREATE SEQUENCE CustomerID_seq START WITH 100 INCREMENT BY 1;
+CREATE SEQUENCE ShoppingBasketID_seq START WITH 100 INCREMENT BY 1;
+CREATE SEQUENCE CategoryID_seq START WITH 100 INCREMENT BY 1;
+CREATE SEQUENCE BrandID_seq START WITH 100 INCREMENT BY 1;
+CREATE SEQUENCE ProductID_seq START WITH 100 INCREMENT BY 1;
+CREATE SEQUENCE WarehouseID_seq START WITH 100 INCREMENT BY 1;
+CREATE SEQUENCE ShoppingBasketProductID_seq START WITH 100 INCREMENT BY 1;
+
+
+-- Create Customer table
+CREATE TABLE Customer (
+CustomerID INTEGER NOT NULL PRIMARY KEY,
+Email VARCHAR2(255) UNIQUE,
+Name VARCHAR2(255) NOT NULL,
+Phone NUMBER(10),
+Address varchar2(50),
+City varchar2(20),
+Province varchar2(2),
+PostalCode varchar2(7),
+username varchar2(15),
+password varchar2(10)
+);
+-- Insert into Customer table
+INSERT INTO Customer VALUES (CustomerID_seq.nextval, 'james23@yahoo.com', 'James Stanely', '4166738091', '46 Dromore Crescent', 'North York', 'ON', 'M2R 2H5','jamee','4321e');
+INSERT INTO Customer VALUES (CustomerID_seq.nextval, 'cindy.smith2020@gmail.com', 'Cindy Smith', '6478732085', '40 Donna Dr', 'Brampton', 'ON', 'L6Z 3V2','cindyS','eeew');
+INSERT INTO Customer VALUES (CustomerID_seq.nextval, 'jerryWilliams@hotmail.com', 'Jerry Williams', '6474216753', '6844 Simpson Pioneer Trail', 'Mississauga', 'ON', 'L5W 1A9','will','aeeew');
+INSERT INTO Customer VALUES (CustomerID_seq.nextval, 'anthony-jefferson1987@icloud.com', 'Anthony Jefferson', '6475728097', '114 Twenty Second St', 'Etobicoke', 'ON','M8V 3M4','goodanthony','apple');
+INSERT INTO Customer VALUES (CustomerID_seq.nextval, 'lwhite276@mail.com', 'Lily White', '4162341326', '39 Bloem Ave', 'York', 'ON', 'M6E 1S2','banana','54328y');
+INSERT INTO Customer VALUES (CustomerID_seq.nextval, 'sarahlong22@yahoo.com', 'Sarah Longfield', '4376685209', '49 Paperbirch Dr', 'North York', 'ON','M3C 2E6','sarah','sarah1123');
+INSERT INTO Customer VALUES (CustomerID_seq.nextval, 'miller-stanley81@zoho.com', 'Stan Miller', '4376738091', '18 Marblemount Crescent', 'Scarborough', 'ON', 'M1T 2H4','miller','miller432');
+INSERT INTO Customer VALUES (CustomerID_seq.nextval, 'jcharlie97@icloud.com', 'Charlie Johnson', '4162228623', '160 Sherwood Forest Dr', 'Markham', 'ON', 'L3P 1R3','happy','charlie1');
+INSERT INTO Customer VALUES (CustomerID_seq.nextval, 'amandastones42@yahoo.com', 'Amanda Stones', '6473672971', '48 Naughton Dr', 'Richmond Hill', 'ON','L4C 8B3','amanda','987654');
+INSERT INTO Customer VALUES (CustomerID_seq.nextval, 'Ogrey11@gmail.com', 'Olivia Grey', '4379550678', '1304 S Aldo Dr', 'Mississauga', 'ON', 'L5H 3E6','olivia','7654');
+INSERT INTO Customer VALUES (CustomerID_seq.nextval, 'george1@gmail.com', 'Georage May', '7783183212', '95 Panlo St', 'Burnaby', 'BC', 'V5H 3E6','may','happy123');
+
+
+--Create ShoppingBasket table
+CREATE TABLE ShoppingBasket (
+ShoppingBasketID INTEGER NOT NULL PRIMARY KEY,
+CustomerID INTEGER,
+Quantity INTEGER NOT NULL,
+OrderPaid NUMBER(1,0),
+dateCreated date DEFAULT SYSDATE,
+dateOrdered date DEFAULT SYSDATE,
+SubTotal number(9,2),
+TotalDiscount number(9,2),
+ShippingFee number(4,2),
+TotalBeforeTax number(9,2),
+Tax number(9,2),
+Total number(9,2),
+IsShipAddressSame Number(1),
+ShipAddress varchar2(50),
+ShipCity varchar2(20),
+ShipProvince varchar2(2),
+ShipPostalCode varchar2(7),
+ShipPhone varchar2(15),
+ShipEmail varchar2(50),
+FOREIGN KEY (CustomerID) REFERENCES Customer(CustomerID)
+);
+-- Insert into ShoppingBasket table
+INSERT INTO ShoppingBasket VALUES (ShoppingBasketID_seq.nextval, 109, 1, 0,'23-JAN-2022','23-Feb-2022',299,29.9,10,279.1,36.28,315.38, 1,null, null, null, null,'7783183212','Ogrey11@gmail.com');
+INSERT INTO ShoppingBasket VALUES (ShoppingBasketID_seq.nextval, 110, 2, 1,'25-May-2022','26-May-2022',2348,0,0,2348,281.76,2653.24, 1,'95 Panlo St', 'Burnaby', 'BC', 'V5H 3E6','4379550678','george1@gmail.com');
+INSERT INTO ShoppingBasket VALUES (ShoppingBasketID_seq.nextval, 100, 2, 1,'11-June-2022','1-July-2022',198,39.6,10,168.4,25.26,193.66, 0,'11 Union Ave', 'Montreal', 'QC', 'Q5H 3E6','3379550678','george1@gmail.com');
+INSERT INTO ShoppingBasket VALUES (ShoppingBasketID_seq.nextval, 101, 1, 0,'11-June-2022',null,99,19.8,10,89.2,11.60,100.08, 1,'40 Donna Dr', 'Brampton', 'ON', 'L6Z 3V2','6478732085','cindy.smith2020@gmail.com');
+insert into  SHOPPINGBASKET(ShoppingBasketID,CustomerID,QUANTITY, OrderPaid) values (ShoppingBasketID_seq.nextval,102, 1,0);
+insert into  SHOPPINGBASKET(ShoppingBasketID,CustomerID,QUANTITY, OrderPaid) values (ShoppingBasketID_seq.nextval,103, 1,0);
+insert into  SHOPPINGBASKET(ShoppingBasketID,CustomerID,QUANTITY, OrderPaid) values (ShoppingBasketID_seq.nextval,104, 1,0);
+ 
+
+
+-- Create Category table
+CREATE TABLE Category(
+CategoryID INTEGER NOT NULL PRIMARY KEY,
+Name VARCHAR2(255)
+);
+-- Insert into Category table
+INSERT INTO Category VALUES (CategoryID_seq.nextval, 'Mobile Phones');
+INSERT INTO Category VALUES (CategoryID_seq.nextval, 'Laptops');
+INSERT INTO Category VALUES (CategoryID_seq.nextval, 'Tablets');
+INSERT INTO Category VALUES (CategoryID_seq.nextval, 'Audio Equipment');
+
+
+
+-- Create Brand table
+CREATE TABLE Brand (
+BrandID INTEGER NOT NULL PRIMARY KEY,
+Name VARCHAR2(255),
+URL VARCHAR2(255)
+);
+-- Insert into Brand table
+INSERT INTO Brand VALUES (BrandID_seq.nextval, 'Apple', 'https://www.apple.com/');
+INSERT INTO Brand VALUES (BrandID_seq.nextval, 'Samsung', 'https://www.samsung.com/ca/');
+INSERT INTO Brand VALUES (BrandID_seq.nextval, 'Microsoft', 'https://www.microsoft.com/en-ca/');
+INSERT INTO Brand VALUES (BrandID_seq.nextval, 'Xiaomi', 'https://www.mi.com/global/');
+INSERT INTO Brand VALUES (BrandID_seq.nextval, 'Sony', 'https://www.sony.ca/en');
+
+
+-- Create Discount table
+CREATE TABLE Discount (
+DiscountID INTEGER DEFAULT '0' PRIMARY KEY,
+Name VARCHAR2(255) NOT NULL,
+DiscountPrecent NUMERIC (5, 2)
+);
+-- Insert into Discount table
+INSERT INTO Discount VALUES (0, 'No sale',0);
+INSERT INTO Discount VALUES (1,'Clearance',0.4);
+INSERT INTO Discount VALUES (2,'Limited Time Offer',0.2);
+INSERT INTO Discount VALUES (3,'Overstock sale',0.1);
+
+
+
+-- Create Product table
+CREATE TABLE Product (
+ProductID INTEGER NOT NULL PRIMARY KEY,
+CategoryID INTEGER,
+BrandID INTEGER,
+Name VARCHAR2(255) NOT NULL,
+Description VARCHAR2(1500),
+Price NUMERIC (10, 2),
+DiscountID INTEGER DEFAULT '0' ,
+FOREIGN KEY (CategoryID) REFERENCES Category(CategoryID),
+FOREIGN KEY (BrandID) REFERENCES Brand(BrandID),
+FOREIGN KEY (DiscountID) REFERENCES Discount(DiscountID)
+);
+-- Insert into Product table
+INSERT INTO Product VALUES (ProductID_seq.nextval,100, 100, 'iPhone 13 Pro', 'A dramatically more powerful camera system. A display so responsive, every interaction feels new again. The world’s fastest smartphone chip. Exceptional durability. And a huge leap in battery life.', 1399,0);
+INSERT INTO Product VALUES (ProductID_seq.nextval,100, 101, 'Galaxy S22 Ultra', 'Meet Galaxy S22 Ultra, with the power of Note. Slim and bold, a polished frame surrounds theextruded shape for elegant symmetry. And the linear camera, accented by mirrored lens rings, seems to float in place.', 1519,0);
+INSERT INTO Product VALUES (ProductID_seq.nextval,100, 102, 'Surface Duo', 'The innovative design of the Microsoft Surface Duo opens doors to countless possibilities. Its dual screens let you access two apps simultaneously or view one across both screens to boost your productivity, watch your favourite shows, and much more. The thin, foldable profile with 360-degree hinge lets you use the tablet like a book or in a variety of other ways.', 1399,0);
+INSERT INTO Product VALUES (ProductID_seq.nextval,100, 103, 'Xiaomi 12 Pro', 'Master Every Scene. Evolving from our constant pursuit of excellence in creating what you are longing for, Xiaomi 12 Pro is now ready to master every scene with a pro-grade 50MP triple camera array, WQHD+ dynamic 120Hz display, the most advanced Snapdragon® 8 Gen 1 chipset yet, and intelligent 120W Xiaomi HyperCharge.', 699,0);
+INSERT INTO Product VALUES (ProductID_seq.nextval,100, 104, 'Xperia 1 IV', 'The Xperia 1 IV delivers the best of Sony to every user and creator. There are standout features for videographers and photographers, and major wins for mobile gamers, whether they’re eSports players or streamers. Audiophiles benefit from decades of Sony sound and music expertise, along with new Music Pro for studio-style song recording. And cinephiles will appreciate the brightest smartphone 4K HDR 120Hz display ever.', 1599,3);
+INSERT INTO Product VALUES (ProductID_seq.nextval,101, 100, 'MacBook Pro 16-inch', 'Easy to learn. Astoundingly powerful. And designed to let you work, play and create in entirely new ways. It’s the computer that comes packed with apps that are ready to go, right out of the box. Free, regular software updates mean it’s always running at it’s best, and always getting better. And if you already have an iPhone, it feels familiar from the moment you turn it on.', 3149,0);
+INSERT INTO Product VALUES (ProductID_seq.nextval,101, 101, 'Galaxy Book2 Pro', 'Light. Powerful. Made to move in style. With plenty of power inside, Galaxy Book2 Pro sacrifices nothing on performance yet weighs in super-light with a slim profile.', 1399,0);
+INSERT INTO Product VALUES (ProductID_seq.nextval,101, 102, 'Surface Laptop 4', 'Style and speed. Stand out on HD video calls backed by Studio Mics. Capture ideas on the vibrant touchscreen. Do it all with a perfect balance of sleek design, speed, immersive audio, and significantly longer battery life than before.', 1199,0);
+INSERT INTO Product VALUES (ProductID_seq.nextval,101,103, 'Redmi Book Pro 15', 'Redmi Book Pro 15 2022 lets you enjoy your favorite work or games to the fullest. The device is designed to perform resource-intensive tasks, which is provided by a high-quality 6th generation processor. The 15-inch high-definition screen perfectly conveys the played picture, allowing you to melt into it. In addition, the screen of the device emits light that does not irritate the eyes, so you can work at the computer throughout the day. A large amount of RAM will provide you with the ability to open multiple different programs at the same time without freezing your computer.', 1399,1);
+INSERT INTO Product VALUES (ProductID_seq.nextval,101,104, 'Vaio Z', 'The VAIO Z is the most innovative, advanced laptop we’ve ever built. Ultraportable, unbelievably light, and packed with power – the VAIO Z is a machine for those determined to reach their full potential and then push past their limits.', 2779,2);
+INSERT INTO Product VALUES (ProductID_seq.nextval,102,100, 'iPad Air', 'iPad is so versatile, it’s more than up to any task. Whether you’re working on a project, expressing your creativity or playing an immersive game, iPad is a fun and powerful way to get it done.', 949,0);
+INSERT INTO Product VALUES (ProductID_seq.nextval,102,101, 'Galaxy Tab A', 'The 10.5” wide display, complete with symmetric bezel measuring only 10.2mm, allows you to stay fully immersed in what’s on the screen. Explore, without compromise. From epic films to how-to content for a hobby that you love, Galaxy Tab A8 invites you to a broader world through a bigger, better view.', 379,1);
+INSERT INTO Product VALUES (ProductID_seq.nextval,102,102, 'Surface Pro 8', 'Unlock more possibilities than ever with the Pro designed for a Pro like you. The first Surface Pro built on the Intel® Evo™ platform on select configurations and designed to light up the best of Windows 11, Surface Pro 8 combines the power of a laptop with the flexibility of a tablet, and every angle in between, with the iconic Kickstand and detachable Keyboard with built-in Slim Pen storage and charging. Do great things with a larger 13” touchscreen, faster connections with Thunderbolt™ 4 ports, and extra speed when you need it.', 1299,0);
+INSERT INTO Product VALUES (ProductID_seq.nextval,102 ,103, 'Xiaomi Pad 5', 'Xiaomi Pad 5 is the new tablet on the market from the Mi brand that has broken all sales records! This tablet which is based on Android 11 can be called a multitasking device, as it has a plenty functions. The main gadget advantage is its high performance, provided by the Qualcomm SnapdragonTM 860 processor. It allows you to enjoy watching videos, playing games, or just surfing the Internet. The gadget has a capacious battery of 8720 mAh, which is enough for more than 5 days of device life (depending on the frequency of use). Designers will love the tablet as it is equipped with a smart Xiaomi pen that allows you to write or draw on the screen.', 299,1);
+INSERT INTO Product VALUES (ProductID_seq.nextval,102,104, 'Sony Xperia Z4', 'The Sony Xperia Z4s slim, waterproof design is simultaneously sleek and solid. Running the latest version of Android, it features a colorful user-friendly overlay. It has a sharp HD screen, and its performance is fast and smooth.', 199,2);
+INSERT INTO Product VALUES (ProductID_seq.nextval,103,100, 'AirPods Pro', 'AirPods Pro have been designed to deliver Active Noise Cancellation for immersive sound, Transparency mode so you can hear your surroundings and a customisable fit for all-day comfort. Just like AirPods, AirPods Pro connect magically to your Apple devices. And they’re ready to use straight out of the case', 349,2);
+INSERT INTO Product VALUES (ProductID_seq.nextval,103,101, 'Galaxy Buds Pro', 'Truly wireless earbuds, with pro-grade technology for immersive sound like never before from Galaxy. Use Intelligent ANC to seamlessly switch between noise canceling and adjustable ambient sound so you can let the outside in — or keep it out. It’s your world. Galaxy Buds Pro lets you hear more of what you want.', 187,2);
+INSERT INTO Product VALUES (ProductID_seq.nextval,103,102, 'Surface Earbuds', 'Featuring ultra-comfortable design, intuitive controls, access to innovative Microsoft 365 experiences and immersive sound for music and calls, plus all-day battery, you’ll never miss a beat. Now available in Graphite.', 99,2);
+INSERT INTO Product VALUES (ProductID_seq.nextval,103,103, 'Buds 3T Pro', 'Immersive beats, magical sound. World leading active noise cancellation technology. Premium Sound Quality. Spatial Audio. Easy to use. High end design and Comfortable wearing', 199,0);
+INSERT INTO Product VALUES (ProductID_seq.nextval,103,104, 'LinkBuds S', 'With LinkBuds S, you’re always connected to your everyday worlds. Ultra-small and light, they can be worn comfortably around the clock, keeping you in touch with people and places. LinkBuds S switches automatically to optimized ambient sound or high-quality noise cancelling for listening without distractions.', 299,3);
+
+
+
+
+
+
+--Create ShoppingBasketProduct table
+CREATE TABLE ShoppingBasketProduct (
+ProductID INTEGER,
+ShoppingBasketID INTEGER,
+Quantity INTEGER NOT NULL,
+FOREIGN KEY (ProductID) REFERENCES Product(ProductID),
+FOREIGN KEY (ShoppingBasketID) REFERENCES ShoppingBasket(ShoppingBasketID)
+);
+
+-- Insert into ShoppingBasketProduct table
+INSERT INTO ShoppingBasketProduct VALUES (119, 100,1);
+INSERT INTO ShoppingBasketProduct VALUES (100, 101,1);
+INSERT INTO ShoppingBasketProduct VALUES (110, 101,1);
+INSERT INTO ShoppingBasketProduct VALUES (117, 102,2);
+INSERT INTO ShoppingBasketProduct VALUES (117, 103,1);
+
+
+-- Create ProductCategory table
+CREATE TABLE ProductCategory (
+ProductID INTEGER,
+CategoryID INTEGER,
+FOREIGN KEY (ProductID) REFERENCES Product(ProductID),
+FOREIGN KEY (CategoryID) REFERENCES Category(CategoryID)
+);
+
+
+
+--Create Warehouse table
+CREATE TABLE Warehouse(
+WarehouseID INTEGER NOT NULL PRIMARY KEY,
+Code INTEGER NOT NULL,
+Phone NUMBER(10),
+Address VARCHAR2(255)
+);
+--Insert into Warehouse table
+INSERT INTO Warehouse VALUES (WarehouseID_seq.nextval, '546781', '4167864991', '150 Kingston Rd E, Ajax, ON L1Z 1G1');
+INSERT INTO Warehouse VALUES (WarehouseID_seq.nextval, '642873', '4161347174', '5900 Finch Ave E, Scarborough, ON M1B 5P8');
+INSERT INTO Warehouse VALUES (WarehouseID_seq.nextval, '742390', '4169234012', '25 B East Pearce St, Richmond Hill, ON L4B 2M9');
+
+
+
+--Create ProductWarehouse table
+CREATE TABLE ProductWarehouse (
+WarehouseID INTEGER,
+ProductID INTEGER,
+Count INTEGER NOT NULL,
+FOREIGN KEY (ProductID) REFERENCES Product(ProductID),
+FOREIGN KEY (WarehouseID) REFERENCES Warehouse(WarehouseID)
+);
+INSERT INTO ProductWarehouse VALUES (101, 100, 50);
+INSERT INTO ProductWarehouse VALUES (100, 101, 49);
+INSERT INTO ProductWarehouse VALUES (102, 102, 301);
+INSERT INTO ProductWarehouse VALUES (100, 103, 200);
+INSERT INTO ProductWarehouse VALUES (100, 104, 3001);
+INSERT INTO ProductWarehouse VALUES (100, 105, 2001);
+INSERT INTO ProductWarehouse VALUES (100, 106, 202);
+INSERT INTO ProductWarehouse VALUES (100, 107, 211);
+INSERT INTO ProductWarehouse VALUES (100, 108, 321);
+INSERT INTO ProductWarehouse VALUES (100, 109, 211);
+INSERT INTO ProductWarehouse VALUES (100, 110, 101);
+INSERT INTO ProductWarehouse VALUES (101, 111, 211);
+INSERT INTO ProductWarehouse VALUES (101, 112, 357);
+INSERT INTO ProductWarehouse VALUES (101, 113, 157);
+INSERT INTO ProductWarehouse VALUES (101, 114, 257);
+INSERT INTO ProductWarehouse VALUES (101, 115, 461);
+INSERT INTO ProductWarehouse VALUES (101, 116, 233);
+INSERT INTO ProductWarehouse VALUES (101, 117, 222);
+INSERT INTO ProductWarehouse VALUES (102, 118, 321);
+INSERT INTO ProductWarehouse VALUES (102, 119, 291);
+
+
+--Functions
+
+
+CREATE OR REPLACE FUNCTION shipping_fee_claculation(sub_total IN NUMBER)
+RETURN NUMBER
+IS 
+lv_shipping_fee NUMBER(4,2);
+BEGIN
+ if sub_total > 300 then
+ lv_shipping_fee := 0;
+ else lv_shipping_fee := 10;
+ end if;
+ RETURN lv_shipping_fee;
+END;
+/
+CREATE OR REPLACE FUNCTION subtotal_claculation(basketid IN NUMBER)
+RETURN NUMBER
+IS 
+CURSOR cur IS
+    SELECT b.customerid customerid ,bi.productid productid ,bi.quantity qty_ordered,p.price price
+    FROM shoppingbasket b JOIN shoppingbasketproduct bi on b.shoppingbasketid = bi.shoppingbasketid JOIN product p on bi.productid = p.productid
+    WHERE b.shoppingbasketid=basketid;
+
+lv_sub_total NUMERIC (10, 2):=0;
+BEGIN
+   FOR rec_itemorder in cur LOOP
+    lv_sub_total:=lv_sub_total+(rec_itemorder.price*rec_itemorder.qty_ordered);
+   END LOOP;
+   -- DBMS_OUTPUT.put_line(Subtotal = ' || lv_sub_total);
+   RETURN lv_sub_total;
+END;
+/
+
+SELECT shoppingbasketid, subtotal actual, subtotal_claculation(shoppingbasketid) calculated from shoppingbasket;
+
+
+
+/
+
+CREATE OR REPLACE FUNCTION total_discount_claculation(basketid IN NUMBER)
+RETURN NUMBER
+IS 
+lv_total_discount NUMERIC (10, 2):=0;
+CURSOR cur IS
+    SELECT b.customerid customerid ,bi.productid productid ,bi.quantity qty_ordered,p.price price,d.discountid item_discount_rate
+    FROM shoppingbasket b JOIN shoppingbasketproduct bi on b.shoppingbasketid = bi.shoppingbasketid JOIN product p on bi.productid = p.productid JOIN discount d on p.discountid=d.discountid
+    WHERE b.shoppingbasketid=basketid;
+BEGIN
+   FOR rec in cur LOOP
+    lv_total_discount:=lv_total_discount+(rec.price*rec.qty_ordered)*rec.item_discount_rate;
+   END LOOP;
+   RETURN lv_total_discount;
+END;
+/
+
+SELECT shoppingbasketid, totaldiscount actual , total_discount_claculation(shoppingbasketid) calculated from shoppingbasket;
+
+/
+
+create or replace function basket_tax_rate(basketid IN NUMBER)
+return number 
+IS
+pr_province VARCHAR2(2);
+tax_rate number;
+begin
+SELECT shipprovince INTO pr_province FROM shoppingbasket WHERE shoppingbasket.shoppingbasketid = basketid;
+if pr_province = 'ON'
+then tax_rate := 0.13;
+return tax_rate;
+elsif pr_province = 'BC'
+then tax_rate := 0.12;
+elsif pr_province = 'QC'
+then tax_rate := 0.15;
+elsif pr_province = 'AB'
+then tax_rate := 0.05;
+end if;
+return tax_rate;
+end;
+/
+
+--Procedure
+
+CREATE OR REPLACE PROCEDURE basket_total(p_idbasket IN shoppingbasketproduct.shoppingbasketid%Type, 
+p_qty OUT Number,
+p_subtotal OUT NUMBER,
+p_totaldiscount OUT NUMBER,
+p_shipfee OUT Number,
+p_totalbeforetax OUT Number,
+p_tax OUT number,
+p_total OUT number)
+IS
+BEGIN
+ select sum(quantity)
+ INTO p_qty
+ FROM shoppingbasketproduct
+ WHERE shoppingbasketid=p_idbasket;
+ p_subtotal:= subtotal_claculation(p_idbasket);
+ p_totaldiscount:=total_discount_claculation(p_idbasket);
+ p_shipfee:=shipping_fee_claculation(p_subtotal);
+ p_totalbeforetax:= p_subtotal-p_totaldiscount+p_shipfee;
+ p_tax:=p_totalbeforetax*basket_tax_rate(p_idbasket);
+ p_total:=p_totalbeforetax+ p_tax;
+
+END basket_total;
+
+/
+-- login procedure
+CREATE OR REPLACE PROCEDURE Login_CK_SP 
+    (a_userid IN customer.customerid%TYPE,
+    a_password IN customer.password%TYPE,
+    a_name OUT customer.name%TYPE,
+    a_check OUT VARCHAR2)
+IS
+BEGIN
+    SELECT name
+    INTO a_name
+    FROM customer
+    WHERE customerid= a_userid AND password = a_password;
+    DBMS_OUTPUT.PUT_LINE('Member Fullname: '||a_name);
+    
+    EXCEPTION
+    WHEN NO_DATA_FOUND THEN   
+    a_check := 'INVALID Login';
+    DBMS_OUTPUT.PUT_LINE(a_check);
+END Login_CK_SP;
+/
+--Execute the procedure
+DECLARE
+  lv_fullname VARCHAR2(35);
+  lv_check VARCHAR2(30); 
+BEGIN 
+  Login_CK_SP('100', '4321e', lv_fullname,lv_check); --valid logon
+  Login_CK_SP('190', '4321e', lv_fullname,lv_check); --invalid logon
+END; 
